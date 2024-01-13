@@ -15,14 +15,17 @@ export class PgUserAccountRepository implements LoadUserAccountRepository {
     }
   }
 
-  async saveWithFacebook (params: SaveFacebookAccountRepository.Params): Promise<void> {
+  async saveWithFacebook (params: SaveFacebookAccountRepository.Params): Promise<SaveFacebookAccountRepository.Result> {
     const hasId = (params.id != null)
     const id = hasId ? Number(params.id) : undefined
-    await this.pgUserRepo.save({
+    const pgUser = await this.pgUserRepo.save({
       id,
       email: hasId ? undefined : params.email,
       name: params.name,
       facebookId: params.facebookId
     })
+    return {
+      id: pgUser.id.toString()
+    }
   }
 }
