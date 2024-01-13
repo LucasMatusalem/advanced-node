@@ -1,26 +1,15 @@
 import { PgUser } from '@/infra/postgres/entities'
 import { PgUserAccountRepository } from '@/infra/postgres/repos'
-import { IBackup, IMemoryDb, newDb } from 'pg-mem'
+import { IBackup } from 'pg-mem'
 import { Repository, getConnection, getRepository } from 'typeorm'
-
-const makeFakeDb = async (entities?: any[]): Promise<IMemoryDb> => {
-  if ((entities == null) || (entities.length === 0)) {
-    entities = ['src/infra/postgres/entities/*']
-  }
-  const db = newDb()
-  const connection = await db.adapters.createTypeormConnection({
-    type: 'postgres',
-    entities
-  })
-  await connection.synchronize()
-  return db
-}
+import { makeFakeDb } from '@/tests/infra/postgres/mocks'
 
 describe('PgUserAccountRepository', () => {
   describe('load', () => {
     let sut: PgUserAccountRepository
     let pgUserRepo: Repository<PgUser>
     let backup: IBackup
+
     beforeAll(async () => {
       const db = await makeFakeDb()
       backup = db.backup()
@@ -35,6 +24,7 @@ describe('PgUserAccountRepository', () => {
       backup.restore()
       sut = new PgUserAccountRepository()
     })
+
     it('should return an account if email exists', async () => {
       await pgUserRepo.save({ email: 'any_email' })
 
